@@ -3,6 +3,7 @@ import { FileItem } from "@/utils/types";
 import { Folder, RefreshCw, Upload } from "lucide-react";
 import { useState } from "react";
 import renderFileList from "./FileList";
+import { toast, Toaster } from "sonner";
 
 export default function tabs({
   activeTab,
@@ -38,7 +39,32 @@ export default function tabs({
     event.preventDefault();
     setIsDragging(false);
 
-    const droppedFiles = Array.from(event.dataTransfer.files);
+    let droppedFiles = Array.from(event.dataTransfer.files);
+    if (droppedFiles.length === 0) return;
+
+    let errors = []
+
+    if (droppedFiles.length > 2){
+      errors.push("You can only upload up to 2 files at a time.");
+      droppedFiles.filter((_, index) => index <= 1);
+    }
+
+    if (droppedFiles.some(file => !["image/jpeg", "image/png", "image/jpg", "image/webp", "image/avif", "application/pdf"].includes(file.type))){
+      errors.push("Only image files are allowed.");
+      droppedFiles = droppedFiles.filter(file => ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/avif", "application/pdf"].includes(file.type));
+    }
+    // if file size is greater than 5MB, alert user
+    if (droppedFiles.some(file => file.size > 5 * 1024 * 1024)){
+      errors.push("File size must be less than 5MB.");
+      droppedFiles = droppedFiles.filter(file => file.size <= 5 * 1024 * 1024);
+    }
+
+    if (errors.length > 0) {
+      errors.forEach(error => toast.error(error));
+    }
+
+
+
     const newFiles: FileItem[] = droppedFiles.map((file, index) => ({
       id: `file-${Date.now()}-${index}`,
       name: file.name,
@@ -53,6 +79,7 @@ export default function tabs({
     case "files":
       return (
         <div className="space-y-6">
+          <Toaster expand={true} richColors closeButton/>
           <div className="flex items-center justify-between">
             <div>
               <h2 className={`text-2xl font-bold ${currentTheme.text}`}>
@@ -74,7 +101,7 @@ export default function tabs({
           <div
             className={`border-2 border-dashed rounded-lg p-8 transition-colors ${
               isDragging
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                ? "border-blue-400 bg-blue-500/20 dark:bg-blue-900/20"
                 : `${currentTheme.border} ${currentTheme.cardBg}`
             }`}
             onDragOver={handleDragOver}
@@ -116,6 +143,7 @@ export default function tabs({
     case "buckets":
       return (
         <div className="space-y-6">
+          <Toaster expand={true} richColors closeButton/>
           <div>
             <h2 className={`text-2xl font-bold ${currentTheme.text}`}>
               S3 Buckets
