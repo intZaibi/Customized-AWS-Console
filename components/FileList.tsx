@@ -1,5 +1,5 @@
 import { FileListProps } from "@/utils/types";
-import { FileText } from "lucide-react";
+import { FileText, RefreshCcw, Trash2 } from "lucide-react";
 
 export default function renderFileList({ files, currentTheme }: FileListProps) {
   if (files.length === 0) {
@@ -23,7 +23,7 @@ export default function renderFileList({ files, currentTheme }: FileListProps) {
       {files.map((file) => (
         <div
           key={file.id}
-          className={`flex items-center justify-between p-3 rounded-lg border ${currentTheme.border} ${currentTheme.cardBg} hover:bg-opacity-80 transition-colors`}
+          className={`flex items-center justify-between p-3 rounded-lg border ${currentTheme.border} bg-slate-700/50 transition-colors`}
         >
           <div className="flex items-center space-x-3">
             <FileText size={20} className={currentTheme.textSecondary} />
@@ -35,6 +35,23 @@ export default function renderFileList({ files, currentTheme }: FileListProps) {
             </div>
               <p className={`text-xs ${currentTheme.textSecondary}`}>{file.progress}%</p>
           </div>
+          {!file.isUploading && <div>
+            {file.error ?
+            <button
+              onClick={() => file.onRetry(file)}
+              className={`text-sm cursor-pointer ${currentTheme.textSecondary} hover:${currentTheme.text} transition-colors`}
+            >
+              <RefreshCcw className="size-5 text-green-500 hover:text-green-400 cursor-pointer"/>
+            </button>
+            : 
+            <button
+              onClick={() => file.onDelete(file.id)}
+              className={`text-sm cursor-pointer ${currentTheme.textSecondary} hover:${currentTheme.text} transition-colors`}
+            >
+              <Trash2 className="size-5 text-red-500 hover:text-red-400 cursor-pointer"/>
+            </button>
+            }
+          </div>}
         </div>
       ))}
     </div>

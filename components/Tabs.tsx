@@ -4,7 +4,7 @@ import { Folder, RefreshCw, Upload } from "lucide-react";
 import { useState } from "react";
 import renderFileList from "./FileList";
 import { toast, Toaster } from "sonner";
-import { uploader } from "@/utils/apis";
+import { deleteFile, uploader } from "@/utils/apis";
 
 export default function tabs({
   activeTab,
@@ -49,7 +49,17 @@ export default function tabs({
       isDeleting: false,
       error: false,
       url: URL.createObjectURL(file),
+      onDelete: async (id) => {
+        try {
+          await deleteFile(id, setFiles)
+          toast.success('File deleted successfully')
+        } catch (error) {
+          toast.error('Error: file could not deleted!')
+        }
+      },
+      onRetry: (file: FileItem) => {if (file) uploadFiles(file);}
     }));
+
     setFiles((prev) => [...prev, ...newFiles]);
 
     newFiles.forEach((file) => {

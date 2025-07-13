@@ -7,6 +7,8 @@ export interface FileItem {
     url?: string;
     key?: string;
     isDeleting: boolean;
+    onRetry: (file: FileItem) => void;
+    onDelete: (id: string) => void;
   }
 
 export type Theme = "light" | "dark";

@@ -3,11 +3,13 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
 
 export async function POST(req:Request) {
-  if (!process.env.AWS_REGION || !process.env.AWS_S3_ACCESS_KEY_ID || !process.env.AWS_S3_SECRET_ACCESS_KEY || !process.env.AWS_S3_BUCKET_NAME) {
+  
+  const {contentType, key, accessKeyId, accessKeySecret} = await req.json();
+  
+  if ((!accessKeyId || !accessKeySecret) && (!process.env.AWS_REGION || !process.env.AWS_S3_ACCESS_KEY_ID || !process.env.AWS_S3_SECRET_ACCESS_KEY || !process.env.AWS_S3_BUCKET_NAME)) {
     console.error("Missing AWS environment variables");
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-  const {contentType, key} = await req.json();
 
   try {
     const signedUrl = await getUrl(key, contentType);
