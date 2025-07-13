@@ -28,9 +28,9 @@ export default function renderFileList({ files, currentTheme }: FileListProps) {
           <div className="flex items-center space-x-3">
             <FileText size={20} className={currentTheme.textSecondary} />
             <div>
-              <p className={`font-medium ${currentTheme.text}`}>{file.name}</p>
+              <p className={`font-medium ${currentTheme.text}`}>{file.file.name}</p>
               <p className={`text-xs ${currentTheme.textSecondary}`}>
-                {file.size} • Modified {file.modified}
+                {Math.round(file.file.size / 1024)} KB
               </p>
             </div>
           </div>

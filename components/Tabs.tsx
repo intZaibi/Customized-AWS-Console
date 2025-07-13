@@ -14,14 +14,17 @@ export default function tabs({
 }) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
     const newFiles: FileItem[] = uploadedFiles.map((file, index) => ({
       id: `file-${Date.now()}-${index}`,
-      name: file.name,
-      type: "file",
-      size: `${(file.size / 1024).toFixed(1)} KB`,
-      modified: new Date().toLocaleDateString(),
+      file: file,
+      isUploading: false,
+      progress: 0,
+      isDeleting: false,
+      error: false,
+      url: URL.createObjectURL(file),
     }));
     setFiles((prev) => [...prev, ...newFiles]);
   };
@@ -63,17 +66,29 @@ export default function tabs({
       errors.forEach(error => toast.error(error));
     }
 
-
-
     const newFiles: FileItem[] = droppedFiles.map((file, index) => ({
       id: `file-${Date.now()}-${index}`,
-      name: file.name,
-      type: "file",
-      size: `${(file.size / 1024).toFixed(1)} KB`,
-      modified: new Date().toLocaleDateString(),
+      file: file,
+      isUploading: false,
+      progress: 0,
+      isDeleting: false,
+      error: false,
+      url: URL.createObjectURL(file),
     }));
     setFiles((prev) => [...prev, ...newFiles]);
+
+    newFiles.forEach((file) => {
+      uploadFiles(file.file);
+      toast.success(`File ${file.file.name} added successfully!`);
+    })
   };
+
+  const uploadFiles = async (file: File) => {
+    setFiles((prev) =>
+      prev.map((f) => (file === f.file) ? { ...f, isUploading: true } : f)
+    );
+    
+  }
 
   switch (activeTab) {
     case "files":

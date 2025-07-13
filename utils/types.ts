@@ -1,10 +1,13 @@
 export interface FileItem {
-  id: string;
-  name: string;
-  type: "file" | "folder";
-  size?: string;
-  modified?: string;
-}
+    id: string;
+    file: File;
+    isUploading: boolean;
+    error?: boolean;
+    progress: number;
+    url?: string;
+    key?: string;
+    isDeleting: boolean;
+  }
 
 export type Theme = "light" | "dark";
 export type Tab = "files" | "buckets" | "settings";
