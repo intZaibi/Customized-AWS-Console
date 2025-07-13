@@ -54,9 +54,7 @@ const S3FileManager: React.FC = () => {
       <Header />
 
       {/* Navigation Tabs */}
-      <nav
-        className={`${currentTheme.headerBg} border-b ${currentTheme.border}`}
-      >
+      <nav className={`${currentTheme.headerBg} border-b ${currentTheme.border}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {tabs.map((tab) => {

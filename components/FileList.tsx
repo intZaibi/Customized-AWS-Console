@@ -33,6 +33,7 @@ export default function renderFileList({ files, currentTheme }: FileListProps) {
                 {Math.round(file.file.size / 1024)} KB
               </p>
             </div>
+              <p className={`text-xs ${currentTheme.textSecondary}`}>{file.progress}%</p>
           </div>
         </div>
       ))}

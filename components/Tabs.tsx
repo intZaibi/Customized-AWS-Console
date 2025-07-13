@@ -4,6 +4,7 @@ import { Folder, RefreshCw, Upload } from "lucide-react";
 import { useState } from "react";
 import renderFileList from "./FileList";
 import { toast, Toaster } from "sonner";
+import { uploader } from "@/utils/apis";
 
 export default function tabs({
   activeTab,
@@ -78,16 +79,43 @@ export default function tabs({
     setFiles((prev) => [...prev, ...newFiles]);
 
     newFiles.forEach((file) => {
-      uploadFiles(file.file);
+      uploadFiles(file);
       toast.success(`File ${file.file.name} added successfully!`);
     })
   };
 
-  const uploadFiles = async (file: File) => {
+  const uploadFiles = async (file: FileItem) => {
     setFiles((prev) =>
-      prev.map((f) => (file === f.file) ? { ...f, isUploading: true } : f)
+      prev.map((f) => (file.file === f.file) ? { ...f, isUploading: true } : f)
     );
     
+    try {
+      const resp = await fetch("/api/s3/sign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contentType: file.file.type, key: file.id }),
+      })
+      if (!resp.ok) {
+        throw new Error("Failed to get signed URL");
+      }
+      const { signedUrl } = await resp.json();
+
+      await uploader(signedUrl, file, setFiles);
+      setFiles((prev) =>
+        prev.map((f) =>
+          file.file === f.file ? { ...f, isUploading: false, progress: 100, error: false } : f
+        )
+      );
+      toast.success(`File ${file.file.name} uploaded successfully!`);
+    } catch (error) {
+      setFiles((prev) =>
+        prev.map((f) => (file.file === f.file) ? { ...f, error: true, isUploading: false, progress: 0 } : f)
+      );
+      toast.error(`Failed to upload ${file.file.name}: ${error}`);
+      return;
+    }
   }
 
   switch (activeTab) {

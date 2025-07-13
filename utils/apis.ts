@@ -1,22 +1,37 @@
-const uploader = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
+import React from "react";
+import { FileItem } from "./types";
 
-    fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Upload failed");
+export const uploader = async (signedUrl: string ,file: FileItem, setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>) => {
+  return new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setFiles((prev) =>
+            prev.map((f) =>
+              file.file === f.file ? { ...f, progress } : f
+            )
+          );
         }
-        return response.json();
-      })
-      .then((data) => {
-        return data;
-      })
-      .catch((error) => error);
-  }
+      }
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          setFiles((prev) =>
+            prev.map((f) => (file.file === f.file ? { ...f, isUploading: false, progress: 100, error: false } : f))
+          );
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      };
+      xhr.onerror = () => {
+        reject(new Error("Network error during upload"));
+      };
+      xhr.open("PUT", signedUrl);
+      xhr.setRequestHeader("Content-Type", file.file.type);
+      xhr.send(file.file);
+    });
+}
 
 const fetchFiles = async () => {
   fetch("/api/files")
