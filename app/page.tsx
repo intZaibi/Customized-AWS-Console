@@ -2,7 +2,7 @@
 import React, { useContext, useState } from "react";
 import { FileText, Folder } from "lucide-react";
 import { FileItem, Tab } from "@/utils/types";
-import Tabs from "@/components/Tabs";
+import Tabs from "@/components/TabsWrapper";
 import Header from "@/components/Header";
 import { Context } from "./context/ContextProvider";
 

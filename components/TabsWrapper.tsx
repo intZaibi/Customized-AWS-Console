@@ -1,10 +1,10 @@
 "use client";
 import { FileItem } from "@/utils/types";
-import { Folder, RefreshCw, Upload } from "lucide-react";
 import { useState } from "react";
-import renderFileList from "./FileList";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { deleteFile, uploader } from "@/utils/apis";
+import BucketTab from "./BucketTab";
+import FileManagerTab from "./FileManagerTab";
 
 export default function tabs({
   activeTab,
@@ -50,10 +50,18 @@ export default function tabs({
       error: false,
       url: URL.createObjectURL(file),
       onDelete: async (id) => {
+        let file: FileItem | undefined;
+        setFiles((prev) => {
+          file = prev.find((f) => f.id === id);
+          return prev.filter((f) => f.id !== id);
+        });
+
         try {
-          await deleteFile(id, setFiles)
+          await deleteFile(id)
           toast.success('File deleted successfully')
+          
         } catch (error) {
+          setFiles((prev) => file ? [...prev, file] : prev);
           toast.error('Error: file could not deleted!')
         }
       },
@@ -128,104 +136,16 @@ export default function tabs({
     }
   }
 
-  switch (activeTab) {
-    case "files":
-      return (
-        <div className="space-y-6">
-          <Toaster expand={true} richColors closeButton/>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className={`text-2xl font-bold ${currentTheme.text}`}>
-                File Management
-              </h2>
-              <p className={`${currentTheme.textSecondary} mt-1`}>
-                Upload, manage, and organize your S3 files
-              </p>
-            </div>
-            <button
-              onClick={() => window.location.reload()}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${currentTheme.buttonSecondary} border`}
-            >
-              <RefreshCw size={16} />
-              <span>Refresh</span>
-            </button>
-          </div>
-
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 transition-colors ${
-              isDragging
-                ? "border-blue-400 bg-blue-500/20 dark:bg-blue-900/20"
-                : `${currentTheme.border} ${currentTheme.cardBg}`
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className={`text-sm ${currentTheme.text}`}>
-                  Files ({files.length})
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <input
-                  type="file"
-                  id="file-upload"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer transition-colors ${currentTheme.button}`}
-                >
-                  <Upload size={16} />
-                  <span>Upload</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`rounded-lg border ${currentTheme.border} ${currentTheme.cardBg}`}
-          >
-            <div className="p-4">{renderFileList({ files, currentTheme })}</div>
-          </div>
-        </div>
-      );
-    case "buckets":
-      return (
-        <div className="space-y-6">
-          <Toaster expand={true} richColors closeButton/>
-          <div>
-            <h2 className={`text-2xl font-bold ${currentTheme.text}`}>
-              S3 Buckets
-            </h2>
-            <p className={`${currentTheme.textSecondary} mt-1`}>
-              Manage your S3 buckets and permissions
-            </p>
-          </div>
-          <div
-            className={`rounded-lg border ${currentTheme.border} ${currentTheme.cardBg} p-8`}
-          >
-            <div className="flex flex-col items-center justify-center">
-              <Folder
-                size={48}
-                className={`${currentTheme.textSecondary} mb-4 opacity-50`}
-              />
-              <h3 className={`text-lg font-medium ${currentTheme.text} mb-2`}>
-                No buckets configured
-              </h3>
-              <p
-                className={`${currentTheme.textSecondary} text-sm text-center`}
-              >
-                Configure your AWS credentials to view and manage S3 buckets
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    default:
-      return <></>;
-  }
+  return activeTab === "files" ?
+    <FileManagerTab fileManagerProps={{
+      currentTheme, 
+      files, 
+      isDragging, 
+      handleDragLeave, 
+      handleDragOver, 
+      handleDrop, 
+      handleFileUpload 
+    }}/>
+    :
+    <BucketTab currentTheme={currentTheme} />
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { FileItem } from "./types";
+import { BucketFilesType, FileItem } from "./types";
 
 export const uploader = async (
   signedUrl: string,
@@ -39,8 +39,8 @@ export const uploader = async (
   });
 };
 
-const fetchFiles = async () => {
-  fetch("/api/files")
+export const fetchFiles = async () => {
+  fetch("/api/s3/getFiles")
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch files");
@@ -48,16 +48,12 @@ const fetchFiles = async () => {
       return response.json();
     })
     .then((data) => data.files)
-    .catch((error) => error);
+    .catch((error) => {
+      throw error;
+    });
 };
 
-export const deleteFile = async (id: string, setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>) => {
-  let file: FileItem | undefined;
-  setFiles((prev) => {
-    file = prev.find((f)=>f.id === id)
-    return prev.filter((f) => f.id !== id)
-  });
-
+export const deleteFile = async (id: string) => {
   try {
     const response = await fetch("/api/s3/delete", {
       method: "DELETE",
@@ -65,14 +61,12 @@ export const deleteFile = async (id: string, setFiles: React.Dispatch<React.SetS
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ key: id }),
-    })
+    });
     if (!response.ok) {
       throw new Error("Failed to delete file");
     }
     return response.json();
-    
   } catch (error) {
-    setFiles((prev)=> file ? [...prev, file] : prev)
     console.log(`Error deleting file:`, error);
     throw error;
   }

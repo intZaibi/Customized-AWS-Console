@@ -1,7 +1,7 @@
 import { FileListProps } from "@/utils/types";
 import { FileText, RefreshCcw, Trash2 } from "lucide-react";
 
-export default function renderFileList({ files, currentTheme }: FileListProps) {
+export default function FileList({ files, currentTheme }: FileListProps) {
   if (files.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -23,7 +23,7 @@ export default function renderFileList({ files, currentTheme }: FileListProps) {
       {files.map((file) => (
         <div
           key={file.id}
-          className={`flex items-center justify-between p-3 rounded-lg border ${currentTheme.border} bg-slate-700/50 transition-colors`}
+          className={`flex items-center justify-between p-3 rounded-lg border ${currentTheme.border}  ${currentTheme.cardBg !== "bg-white" ? "bg-slate-700/50" : "bg-slate-200/50"} transition-colors`}
         >
           <div className="flex items-center space-x-3">
             <FileText size={20} className={currentTheme.textSecondary} />
