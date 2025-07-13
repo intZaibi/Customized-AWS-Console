@@ -140,6 +140,7 @@ export default function tabs({
     <FileManagerTab fileManagerProps={{
       currentTheme, 
       files, 
+      setFiles,
       isDragging, 
       handleDragLeave, 
       handleDragOver, 

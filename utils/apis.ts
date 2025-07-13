@@ -1,5 +1,5 @@
 import React from "react";
-import { BucketFilesType, FileItem } from "./types";
+import { FileItem } from "./types";
 
 export const uploader = async (
   signedUrl: string,
@@ -40,17 +40,19 @@ export const uploader = async (
 };
 
 export const fetchFiles = async () => {
-  fetch("/api/s3/getFiles")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to fetch files");
-      }
-      return response.json();
-    })
-    .then((data) => data.files)
-    .catch((error) => {
-      throw error;
-    });
+  console.log("fetching...")
+  try {
+    const response = await fetch("/api/s3/getFiles")
+    if (!response.ok) {
+      console.log('Response:', response)
+      throw new Error("Failed to fetch files");
+    }
+    const data = await response.json();
+    return data.files
+    
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const deleteFile = async (id: string) => {

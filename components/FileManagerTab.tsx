@@ -1,14 +1,15 @@
 import { RefreshCw, Upload } from "lucide-react";
 import { Toaster } from "sonner";
-import renderFileList from "./FileList";
 import { FileItem } from "@/utils/types";
 import FileList from "./FileList";
+import React from "react";
 
 interface FileManagerTabProps {
   fileManagerProps: {
     currentTheme: Record<string, string>;
     files: FileItem[];
     isDragging: boolean;
+    setFiles: ([])=>void;
     handleDragLeave: () => void;
     handleDragOver: (event: React.DragEvent) => void;
     handleDrop: (event: React.DragEvent) => void;
@@ -23,6 +24,7 @@ export default function FileManagerTab({
   const {
     currentTheme,
     files,
+    setFiles,
     isDragging,
     handleDragLeave,
     handleDragOver,
@@ -43,7 +45,7 @@ export default function FileManagerTab({
           </p>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => setFiles([])}
           className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${currentTheme.buttonSecondary} border`}
         >
           <RefreshCw size={16} />

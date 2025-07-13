@@ -1,7 +1,9 @@
 import { BucketFilesType } from "@/utils/types";
-import { useState } from "react";
-import { Toaster } from "sonner";
+import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
 import BucketFileList from "./BucketFileList";
+import { fetchFiles } from "@/utils/apis";
+import { RefreshCw } from "lucide-react";
 
 const demoFiles = [
     {
@@ -47,19 +49,55 @@ export default function BucketTab({
 }: {
   currentTheme: Record<string, string>;
 }) {
+  const [files, setFiles] = useState<BucketFilesType[]>([]);
+  const [refresh, setRefresh] = useState(false);
+  
+  const getData = ()=>{
+    const promise = () => new Promise(async (resolve, reject) => {
+      try {
+        const data = await fetchFiles();
+        setFiles(data);
+        resolve("")
+      } catch (error) {
+        console.log("Error Fetching Bucket Data: ", error);
+        reject()
+      }
+    });
 
-  const [files, setFiles] = useState<BucketFilesType[]>(demoFiles);
+    toast.promise(promise, {
+      loading: 'Loading...',
+      success: () => 'Data fetching successful.',
+      error: 'Error Fetching Bucket Data!',
+    });
+  }
+
+  useEffect(()=>{
+    const key = setTimeout(()=>{
+      getData();
+    }, 1000)
+
+    return () => clearTimeout(key)
+  }, [refresh])
 
   return (
     <div className="space-y-6">
       <Toaster expand={true} richColors closeButton />
-      <div>
-        <h2 className={`text-2xl font-bold ${currentTheme.text}`}>
-          S3 Buckets
-        </h2>
-        <p className={`${currentTheme.textSecondary} mt-1`}>
-          Manage your S3 buckets and permissions
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className={`text-2xl font-bold ${currentTheme.text}`}>
+            S3 Buckets
+          </h2>
+          <p className={`${currentTheme.textSecondary} mt-1`}>
+            Manage your S3 buckets and permissions
+          </p>
+        </div>
+        <button
+          onClick={() => setRefresh(!refresh)}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${currentTheme.buttonSecondary} border cursor-pointer`}
+        >
+          <RefreshCw size={16} />
+          <span>Refresh</span>
+        </button>
       </div>
       <BucketFileList files={files} setFiles={setFiles} currentTheme={currentTheme}/>
     </div>
