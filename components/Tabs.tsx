@@ -16,34 +16,8 @@ export default function tabs({
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFiles = Array.from(event.target.files || []);
-    const newFiles: FileItem[] = uploadedFiles.map((file, index) => ({
-      id: `file-${Date.now()}-${index}`,
-      file: file,
-      isUploading: false,
-      progress: 0,
-      isDeleting: false,
-      error: false,
-      url: URL.createObjectURL(file),
-    }));
-    setFiles((prev) => [...prev, ...newFiles]);
-  };
+  const handleFiles = (droppedFiles: File[]) => {
 
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragging(false);
-
-    let droppedFiles = Array.from(event.dataTransfer.files);
     if (droppedFiles.length === 0) return;
 
     let errors = []
@@ -82,15 +56,38 @@ export default function tabs({
       uploadFiles(file);
       toast.success(`File ${file.file.name} added successfully!`);
     })
+  }
+
+  // handler for upload button
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(Array.from(event.target.files || []));
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  // file handler for drag and drop
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragging(false);
+    
+    handleFiles(Array.from(event.dataTransfer.files));
   };
 
   const uploadFiles = async (file: FileItem) => {
     setFiles((prev) =>
       prev.map((f) => (file.file === f.file) ? { ...f, isUploading: true } : f)
     );
-    
+
     try {
-      const resp = await fetch("/api/s3/sign", {
+      // get signed URL from backend
+      const resp = await fetch("/api/s3/upload", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,13 +99,16 @@ export default function tabs({
       }
       const { signedUrl } = await resp.json();
 
-      await uploader(signedUrl, file, setFiles);
+      await uploader(signedUrl, file, setFiles); // upload the file to S3 from client
+      
       setFiles((prev) =>
         prev.map((f) =>
           file.file === f.file ? { ...f, isUploading: false, progress: 100, error: false } : f
         )
       );
+
       toast.success(`File ${file.file.name} uploaded successfully!`);
+    
     } catch (error) {
       setFiles((prev) =>
         prev.map((f) => (file.file === f.file) ? { ...f, error: true, isUploading: false, progress: 0 } : f)
