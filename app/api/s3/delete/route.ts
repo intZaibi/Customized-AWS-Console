@@ -20,7 +20,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ message: "File deleted successfully" }, { status: 200 });
   } catch (error) {
     console.log("Error in delete route:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse(error instanceof Error ? error.message : "Failed to delete file", { status: 500 });
   }
 }
 
@@ -42,6 +42,7 @@ async function deleteFile(key: string, accessKeyId?: string, accessKeySecret?: s
 
   try {
     await s3.send(deleteObjectCommand);
+    return true;
   } catch (error) {
     console.log("Error deleting file from S3:", error);
     throw new Error(`Failed to delete file: ${error}`);
