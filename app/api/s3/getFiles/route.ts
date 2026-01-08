@@ -1,6 +1,6 @@
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
-import { getUrl } from "../upload/route";
+import { getUrl } from "@/utils/helpers";
 
 export async function GET() {
   if (

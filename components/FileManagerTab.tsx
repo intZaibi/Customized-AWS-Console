@@ -2,14 +2,14 @@ import { RefreshCw, Upload } from "lucide-react";
 import { Toaster } from "sonner";
 import { FileItem } from "@/utils/types";
 import FileList from "./FileList";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 interface FileManagerTabProps {
   fileManagerProps: {
     currentTheme: Record<string, string>;
     files: FileItem[];
     isDragging: boolean;
-    setFiles: ([])=>void;
+    setFiles: Dispatch<SetStateAction<FileItem[]>>;
     handleDragLeave: () => void;
     handleDragOver: (event: React.DragEvent) => void;
     handleDrop: (event: React.DragEvent) => void;
